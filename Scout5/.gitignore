@@ -19,15 +19,65 @@ target/
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Local development-only tools and pages
+dev-tools/
 
-### VS Code ###
+# ── H2 banco de dados ─────────────────────────────────
+*.db
+*.mv.db
+*.trace.db
+
+# ── Maven ────────────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ── Spring Boot ──────────────────────────────────────
+*.jar
+*.war
+*.ear
+*.nar
+!.mvn/**
+
+# ── IDEs ─────────────────────────────────────────────
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# VS Code
 .vscode/
+
+# ── Sistema Operacional ───────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Logs ─────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+spring.log
+
+# ── Cobertura de testes ───────────────────────────────
+.jacoco/
+jacoco.exec
+
+# ── Ambiente ─────────────────────────────────────────
+.env
+.env.local
+*.env
+
+# ── Node (scripts auxiliares) ─────────────────────────
+node_modules/
+
+# ── Python (scripts CI) ───────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/

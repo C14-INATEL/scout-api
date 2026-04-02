@@ -1,0 +1,158 @@
+package com.balbuena.Scout.service;
+
+import com.balbuena.Scout.dto.Response;
+import com.balbuena.Scout.exception.ScoutException;
+import com.balbuena.Scout.model.GamePhase;
+import com.balbuena.Scout.model.GameState;
+import com.balbuena.Scout.repository.GameStateRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("GameService")
+class GameServiceTest {
+
+    @Mock
+    private GameStateRepository gameStateRepository;
+
+    @InjectMocks
+    private GameService gameService;
+
+    private GameState makeState(GamePhase phase) {
+        GameState s = new GameState();
+        s.setId(1L);
+        s.setPhase(phase);
+        s.setCurrentRound(0);
+        s.setCurrentAuctionPlayerIndex(0);
+        s.setTotalRounds(6);
+        return s;
+    }
+
+    // ---------------
+    // FLUXO NORMAL
+
+    @Nested
+    @DisplayName("Fluxo Normal")
+    class FluxoNormal {
+
+        @Test
+        @DisplayName("01 - getGameState retorna estado existente")
+        void getGameState() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.REGISTRATION))); //faz a busca pelo estado  
+
+            GameState result = gameService.getGameState(); //  armazena o resultado da busca
+
+            assertThat(result.getPhase()).isEqualTo(GamePhase.REGISTRATION); //verifica se o estado é o esperado
+        }
+
+        @Test
+        @DisplayName("02 - advanceToAuctionPhase transiciona de REGISTRATION para DRAFT_AUCTION")
+        void advanceToAuction() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.REGISTRATION))); //faz a busca pelo estado  
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0)); //salva o estado (IA ajudou aqui,sem isso pode retornar null e quebrar o teste)
+
+            Response.GameState result = gameService.advanceToAuctionPhase(); //armazena o resultado da busca
+
+            assertThat(result.getPhase()).isEqualTo(GamePhase.DRAFT_AUCTION); //verifica se o estado é o esperado
+        }
+
+        @Test
+        @DisplayName("03 - advanceAuctionToNextPlayer no índice 4 vai para DRAFT_LOTTERY")
+        void advanceAuction() {
+            GameState state = makeState(GamePhase.DRAFT_AUCTION); //cria o estado
+            state.setCurrentAuctionPlayerIndex(4); // define o índice do jogador atual
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(state)); //faz a busca pelo estado  
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0)); //salva o estado (IA ajudou aqui,sem isso pode retornar null e quebrar o teste)
+
+            Response.GameState result = gameService.advanceAuctionToNextPlayer(); //armazena o resultado da busca
+
+            assertThat(result.getPhase()).isEqualTo(GamePhase.DRAFT_LOTTERY); //verifica se o estado é o esperado
+        }
+
+        @Test
+        @DisplayName("04 - advanceToChampionship transiciona de DRAFT_LOTTERY para CHAMPIONSHIP")
+        void advanceToChampionship() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.DRAFT_LOTTERY))); //faz a busca pelo estado  
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0)); //salva o estado (IA ajudou aqui,sem isso pode retornar null e quebrar o teste)
+
+            Response.GameState result = gameService.advanceToChampionship(); //armazena o resultado da busca
+
+            assertThat(result.getPhase()).isEqualTo(GamePhase.CHAMPIONSHIP);
+        }
+        //test 5
+        //test 6
+        //test 7
+        //test 8
+        //test 9
+        //test 10
+    }
+ 
+    // --------------------------------------
+    // FLUXO DE EXTENSÃO
+
+    @Nested
+    @DisplayName("Fluxo de Extensão")
+    class FluxoExtensao {
+
+        @Test
+        @DisplayName("11 - getGameState lança exceção quando estado não existe")
+        void getGameState() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.empty()); //faz a busca pelo estado  
+
+            assertThatThrownBy(() -> gameService.getGameState()) //verifica se o estado é o esperado
+                .isInstanceOf(ScoutException.class); //verifica se a exceção é a esperada
+        }
+
+        @Test
+        @DisplayName("12 - advanceToAuctionPhase fora de REGISTRATION lança exceção")
+        void advanceToAuction_faseErrada_lancaExcecao() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.DRAFT_AUCTION))); //faz a busca pelo estado  
+
+            assertThatThrownBy(() -> gameService.advanceToAuctionPhase())   
+                .isInstanceOf(ScoutException.class); //verifica se a exceção é a esperada
+        }
+
+        @Test
+        @DisplayName("13 - advanceAuctionToNextPlayer fora do leilão lança exceção")
+        void advanceAuction_faseErrada_lancaExcecao() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.CHAMPIONSHIP))); //faz a busca pelo estado  
+
+            assertThatThrownBy(() -> gameService.advanceAuctionToNextPlayer()) //verifica se o estado é o esperado
+                .isInstanceOf(ScoutException.class); //verifica se a exceção é a esperada
+        }
+
+        @Test
+        @DisplayName("14 - advanceToChampionship fora de DRAFT_LOTTERY lança exceção")
+        void advanceToChampionship_faseErrada_lancaExcecao() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.REGISTRATION)));//faz a busca pelo estado  
+
+            assertThatThrownBy(() -> gameService.advanceToChampionship()) //verifica se o estado é o esperado
+                .isInstanceOf(ScoutException.class); //verifica se a exceção é a esperada
+        }
+
+        @Test
+        @DisplayName("15 - openTransferWindow fora de CHAMPIONSHIP lança exceção")
+        void openTransferWindow_faseErrada_lancaExcecao() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.REGISTRATION))); //faz a busca pelo estado  
+ 
+            assertThatThrownBy(() -> gameService.openTransferWindow()) //verifica se o estado é o esperado
+                .isInstanceOf(ScoutException.class); //verifica se a exceção é a esperada
+        }
+        //test 16
+        //test 17
+        //test 18
+        //test 19
+        //test 20
+    }
+}

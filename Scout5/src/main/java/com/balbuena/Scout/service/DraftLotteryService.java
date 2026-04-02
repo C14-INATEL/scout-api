@@ -62,7 +62,8 @@ public class DraftLotteryService {
                         .filter(p -> p.getPosition() == Position.GOALKEEPER)
                         .findFirst().orElse(null);
                 if (gk != null) {
-                    assignPlayer(president, gk, pool);
+                    assignPlayer(president, gk);
+                    pool.remove(gk);
                     slotsNeeded--;
                     result.append("  🧤 ").append(gk.getName()).append(" (GK) - R$ ").append(gk.getValue()).append("\n");
                 }
@@ -73,7 +74,8 @@ public class DraftLotteryService {
             while (assigned < slotsNeeded && it.hasNext()) {
                 Player p = it.next();
                 if (p.getPresident() == null) {
-                    assignPlayer(president, p, pool);
+                    assignPlayer(president, p);
+                    it.remove();
                     assigned++;
                     result.append("  ⚽ ").append(p.getName())
                           .append(" (").append(p.getPosition()).append(") - R$ ").append(p.getValue()).append("\n");
@@ -86,11 +88,10 @@ public class DraftLotteryService {
         return result.toString();
     }
 
-    private void assignPlayer(President president, Player player, List<Player> pool) {
+    private void assignPlayer(President president, Player player) {
         player.setPresident(president);
         player.setAvailable(false);
         playerRepository.save(player);
-        pool.remove(player);
     }
 
     public List<Response.Player> getAvailableForLottery() {
