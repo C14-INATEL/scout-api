@@ -9,5 +9,5 @@ import java.util.List;
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByRoundNumber(int roundNumber);
     List<Match> findByRoundNumberAndPlayedFalse(int roundNumber);
-    List<Match> findByHomePresidenteIdOrAwayPresidenteId(Long homeId, Long awayId);
+    List<Match> findByHomePresidentIdOrAwayPresidentId(Long homeId, Long awayId);
 }

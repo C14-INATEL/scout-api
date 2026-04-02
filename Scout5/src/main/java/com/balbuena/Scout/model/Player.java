@@ -22,7 +22,7 @@ public class Player {
     @Column(nullable = false)
     private Position position;
 
-    @Column(nullable = false)
+    @Column(name = "market_value", nullable = false)
     private Double value;
 
     @Column(name = "is_auction_player")
