@@ -90,8 +90,32 @@ class GameServiceTest {
 
             assertThat(result.getPhase()).isEqualTo(GamePhase.CHAMPIONSHIP);
         }
-        //test 5
-        //test 6
+
+        @Test
+        @DisplayName("05 - advanceAuctionToNextPlayer incrementa índice quando ainda não é o último jogador")
+        void advanceAuction_incrementaIndice() {
+            GameState state = makeState(GamePhase.DRAFT_AUCTION);
+            state.setCurrentAuctionPlayerIndex(2);
+
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(state));
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            Response.GameState result = gameService.advanceAuctionToNextPlayer();
+
+            assertThat(result.getPhase()).isEqualTo(GamePhase.DRAFT_AUCTION);
+            assertThat(result.getCurrentAuctionPlayerIndex()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("06 - openTransferWindow transiciona de CHAMPIONSHIP para TRANSFER_WINDOW")
+        void openTransferWindow() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.CHAMPIONSHIP)));
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            Response.GameState result = gameService.openTransferWindow();
+
+            assertThat(result.getPhase()).isEqualTo(GamePhase.TRANSFER_WINDOW);
+        }
         //test 7
         //test 8
         //test 9
@@ -149,8 +173,24 @@ class GameServiceTest {
             assertThatThrownBy(() -> gameService.openTransferWindow()) //verifica se o estado é o esperado
                 .isInstanceOf(ScoutException.class); //verifica se a exceção é a esperada
         }
-        //test 16
-        //test 17
+
+        @Test
+        @DisplayName("16 - openTransferWindow quando estado não existe lança exceção")
+        void openTransferWindow_estadoNaoExiste_lancaExcecao() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> gameService.openTransferWindow())
+                    .isInstanceOf(ScoutException.class);
+        }
+
+        @Test
+        @DisplayName("17 - advanceAuctionToNextPlayer quando estado não existe lança exceção")
+        void advanceAuction_estadoNaoExiste_lancaExcecao() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> gameService.advanceAuctionToNextPlayer())
+                    .isInstanceOf(ScoutException.class);
+        }
         //test 18
         //test 19
         //test 20
