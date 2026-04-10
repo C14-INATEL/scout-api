@@ -107,19 +107,18 @@ class GameServiceTest {
         }
 
         @Test
-        @DisplayName("06 - openTransferWindow transiciona de CHAMPIONSHIP para TRANSFER_WINDOW")
+        @DisplayName("06 - openTransferWindow transiciona de CHAMPIONSHIP para TRANSFER_WINDOW após a rodada 3")
         void openTransferWindow() {
-            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.CHAMPIONSHIP)));
+            GameState state = makeState(GamePhase.CHAMPIONSHIP);
+            state.setCurrentRound(3);
+
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(state));
             when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             Response.GameState result = gameService.openTransferWindow();
 
             assertThat(result.getPhase()).isEqualTo(GamePhase.TRANSFER_WINDOW);
         }
-        //test 7
-        //test 8
-        //test 9
-        //test 10
     }
  
     // --------------------------------------
@@ -191,8 +190,5 @@ class GameServiceTest {
             assertThatThrownBy(() -> gameService.advanceAuctionToNextPlayer())
                     .isInstanceOf(ScoutException.class);
         }
-        //test 18
-        //test 19
-        //test 20
     }
 }
