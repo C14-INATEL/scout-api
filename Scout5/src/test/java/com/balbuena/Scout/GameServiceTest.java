@@ -119,6 +119,53 @@ class GameServiceTest {
 
             assertThat(result.getPhase()).isEqualTo(GamePhase.TRANSFER_WINDOW);
         }
+
+	@Test
+        @DisplayName("07 - closeTransferWindow transiciona de TRANSFER_WINDOW para CHAMPIONSHIP")
+        void closeTransferWindow() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.TRANSFER_WINDOW)));
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+ 
+            Response.GameState result = gameService.closeTransferWindow();
+ 
+            assertThat(result.getPhase()).isEqualTo(GamePhase.CHAMPIONSHIP);
+        }
+ 
+        @Test
+        @DisplayName("08 - finishChampionship transiciona de CHAMPIONSHIP para FINISHED")
+        void finishChampionship_deChampionship() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.CHAMPIONSHIP)));
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+ 
+            Response.GameState result = gameService.finishChampionship();
+ 
+            assertThat(result.getPhase()).isEqualTo(GamePhase.FINISHED);
+        }
+ 
+        @Test
+        @DisplayName("09 - finishChampionship transiciona de TRANSFER_WINDOW para FINISHED")
+        void finishChampionship_deTransferWindow() {
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(makeState(GamePhase.TRANSFER_WINDOW)));
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+ 
+            Response.GameState result = gameService.finishChampionship();
+ 
+            assertThat(result.getPhase()).isEqualTo(GamePhase.FINISHED);
+        }
+ 
+        @Test
+        @DisplayName("10 - openTransferWindow abre com rodada igual a 3")
+        void openTransferWindow_rodadaValida() {
+            GameState state = makeState(GamePhase.CHAMPIONSHIP);
+            state.setCurrentRound(3); 
+ 
+            when(gameStateRepository.findById(1L)).thenReturn(Optional.of(state));
+            when(gameStateRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+ 
+            Response.GameState result = gameService.openTransferWindow();
+ 
+            assertThat(result.getPhase()).isEqualTo(GamePhase.TRANSFER_WINDOW);
+        }
     }
  
     // --------------------------------------
