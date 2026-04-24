@@ -237,5 +237,23 @@ class GameServiceTest {
             assertThatThrownBy(() -> gameService.advanceAuctionToNextPlayer())
                     .isInstanceOf(ScoutException.class);
         }
+        @Test
+        @DisplayName("18 - closeTransferWindow fora de TRANSFER_WINDOW lança exceção")
+        void closeTransferWindow_faseErrada_lancaExcecao() {
+            when(gameStateRepository.findById(1L))
+                    .thenReturn(Optional.of(makeState(GamePhase.CHAMPIONSHIP)));
+
+            assertThatThrownBy(() -> gameService.closeTransferWindow())
+                    .isInstanceOf(ScoutException.class);
+        }
+        @Test
+        @DisplayName("19 - finishChampionship fora de CHAMPIONSHIP ou TRANSFER_WINDOW lança exceção")
+        void finishChampionship_faseErrada_lancaExcecao() {
+            when(gameStateRepository.findById(1L))
+                    .thenReturn(Optional.of(makeState(GamePhase.REGISTRATION)));
+
+            assertThatThrownBy(() -> gameService.finishChampionship())
+                    .isInstanceOf(ScoutException.class);
+        }
     }
 }
