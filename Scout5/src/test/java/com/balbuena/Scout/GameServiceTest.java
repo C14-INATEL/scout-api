@@ -1,10 +1,12 @@
-package com.balbuena.Scout.service;
+package com.balbuena.Scout;
 
 import com.balbuena.Scout.dto.Response;
 import com.balbuena.Scout.exception.ScoutException;
 import com.balbuena.Scout.model.GamePhase;
 import com.balbuena.Scout.model.GameState;
 import com.balbuena.Scout.repository.GameStateRepository;
+import com.balbuena.Scout.service.GameService;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
