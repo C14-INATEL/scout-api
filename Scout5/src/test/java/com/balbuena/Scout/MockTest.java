@@ -87,4 +87,37 @@ class Tarefa4MockTest {
 
         verify(presidentRepository, times(1)).findById(99L);
     }
+
+    @Test
+    @DisplayName("03 - generateSchedule: mock indica tabela já existente, serviço lança exceção")
+    void generateSchedule_mockTabelaExistente_lancaExcecao() {
+        // ARRANGE — mock simula 6 partidas já salvas no banco
+        doNothing().when(gameService).validatePhase(any(), any());
+        when(matchRepository.count()).thenReturn(6L);
+
+        // ACT & ASSERT — serviço deve recusar gerar tabela duplicada
+        assertThatThrownBy(() -> championshipService.generateSchedule())
+                .isInstanceOf(ScoutException.class)
+                .hasMessageContaining("ja foi gerada");
+
+        verify(matchRepository, times(1)).count();
+        verify(matchRepository, never()).saveAll(any()); // saveAll nunca deve ser chamado
+    }
+
+    @Test
+    @DisplayName("04 - generateSchedule: mock com 1 presidente, serviço lança exceção de mínimo")
+    void generateSchedule_mockUmPresidente_lancaExcecao() {
+        // ARRANGE — mock: banco vazio de partidas mas só 1 presidente cadastrado
+        doNothing().when(gameService).validatePhase(any(), any());
+        when(matchRepository.count()).thenReturn(0L);
+        when(presidenteRepository.findAll())
+                .thenReturn(List.of(makePresidente(1L, "Sozinho")));
+
+        // ACT & ASSERT — serviço deve exigir mínimo 2 presidentes
+        assertThatThrownBy(() -> championshipService.generateSchedule())
+                .isInstanceOf(ScoutException.class)
+                .hasMessageContaining("2 presidentes");
+
+        verify(matchRepository, never()).saveAll(any()); // nunca salva se validação falhou
+    }
 }
