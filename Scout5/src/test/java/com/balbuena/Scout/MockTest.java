@@ -110,13 +110,13 @@ class Tarefa4MockTest {
         // ARRANGE — mock: banco vazio de partidas mas só 1 presidente cadastrado
         doNothing().when(gameService).validatePhase(any(), any());
         when(matchRepository.count()).thenReturn(0L);
-        when(presidenteRepository.findAll())
-                .thenReturn(List.of(makePresidente(1L, "Sozinho")));
+        when(presidentRepository.findAll())
+                .thenReturn(List.of(makePresident(1L, "Sozinho")));
 
         // ACT & ASSERT — serviço deve exigir mínimo 2 presidentes
         assertThatThrownBy(() -> championshipService.generateSchedule())
                 .isInstanceOf(ScoutException.class)
-                .hasMessageContaining("2 presidentes");
+                .hasMessageContaining("2 presidents");
 
         verify(matchRepository, never()).saveAll(any()); // nunca salva se validação falhou
     }
