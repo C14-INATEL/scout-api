@@ -174,14 +174,18 @@ npm run build
 
 ## CI/CD
 
-O projeto utiliza Jenkins para integração contínua.
+O projeto utiliza Jenkins para integração contínua e simulação de entrega contínua.
 
-A pipeline executa etapas de validação, testes e build, incluindo:
+A pipeline executa etapas de instalação, validação, testes, build, empacotamento e simulação de deploy, incluindo:
 
+- Instalação das dependências do frontend;
 - Testes automatizados do backend;
 - Validação da estrutura principal do projeto;
 - Build do backend;
-- Build do frontend.
+- Build do frontend;
+- Arquivamento dos artefatos gerados;
+- Simulação de deploy com verificação dos Dockerfiles e mensagem do comando de execução;
+- Mensagens de status ao final da execução.
 
 O arquivo de configuração da pipeline está disponível em:
 

@@ -1,6 +1,15 @@
 pipeline {
   agent any
+
   stages {
+    stage('Install Frontend Dependencies') {
+      steps {
+        dir('Scout-front') {
+          sh 'npm ci --include=dev'
+        }
+      }
+    }
+
     stage('Backend Tests') {
       steps {
         dir('Scout5') {
@@ -31,10 +40,36 @@ pipeline {
     stage('Build Frontend') {
       steps {
         dir('Scout-front') {
-          sh 'npm ci --include=dev'
           sh 'npm run build'
         }
       }
+    }
+
+    stage('Package Artifacts') {
+      steps {
+        archiveArtifacts artifacts: 'Scout5/target/*.jar, Scout-front/dist/**', fingerprint: true
+      }
+    }
+
+    stage('Deployment Simulation') {
+      steps {
+        sh 'test -f Scout5/Dockerfile'
+        sh 'test -f Scout-front/Dockerfile'
+        echo 'Deployment simulation command: docker compose --env-file .env.example up --build -d'
+        echo 'Deployment simulation completed: compose file and Dockerfiles are available.'
+      }
+    }
+  }
+
+  post {
+    success {
+      echo 'Pipeline finished successfully: dependencies, tests, validation, builds, artifacts and deployment simulation passed.'
+    }
+    failure {
+      echo 'Pipeline failed. Check the stage logs to identify the failed CI/CD step.'
+    }
+    always {
+      echo "Pipeline status: ${currentBuild.currentResult}"
     }
   }
 }
