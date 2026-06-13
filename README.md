@@ -176,6 +176,8 @@ npm run build
 
 O projeto utiliza Jenkins para integração contínua e simulação de entrega contínua.
 
+A pipeline usa `Poll SCM` para verificar automaticamente novos commits na branch principal a cada 5 minutos.
+
 A pipeline executa etapas de instalação, validação, testes, build, empacotamento e simulação de deploy, incluindo:
 
 - Instalação das dependências do frontend;

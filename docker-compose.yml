@@ -41,10 +41,13 @@ services:
       - backend
 
   jenkins:
-    image: jenkins/jenkins:latest-jdk21
+    build:
+      context: ./jenkins
     container_name: scout-jenkins
     ports:
       - "${JENKINS_PORT:-8081}:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home
     depends_on:
       - backend
       - frontend
